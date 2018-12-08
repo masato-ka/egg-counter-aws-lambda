@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    AWS Serverless Application
+
+    Sample SAM Template for AWS Serverless Application
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+    Function:
+        Timeout: 3
+
+
+Resources:
+
+    EggCounterFunction:
+        Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+        Properties:
+            CodeUri: egg_counter/
+            Handler: app.lambda_handler
+            Runtime: python3.6
+            Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+                Variables:
+                    DEVICE_ID: !Ref DeviceIdParameter
+                    X_DEVICE_SECRET: !Ref DeviceSecretParameter
+                    AUTH_KEY: !Ref AuthKeyParameter
+                    AUTH_KEY_ID: !Ref AuthKeyIdParameter
+                    MAX_REMAINING: !Ref MaxRemainingParameter
+            Events:
+                EggCounter:
+                    Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+                    Properties:
+                        Path: /egg_counter
+                        Method: get
+
+Outputs:
+
+    EggCounterApi:
+      Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+
+    EggCounterFunction:
+      Description: "Egg Counter Lambda Function ARN"
+      Value: !GetAtt EggCounterFunction.Arn
+
+    HelloWorldFunctionIamRole:
+      Description: "Implicit IAM Role created for Egg Counter function"
+      Value: !GetAtt EggCounterFunctionRole.Arn
+
+Parameters:
+  DeviceIdParameter:
+    Type: String
+    NoEcho: true
+    Description: Device id that got from SORACOM Inventory.
+  DeviceSecretParameter:
+    Type: String
+    NoEcho: true
+    Description: Device secret that got from SORACOM Inventory.
+  AuthKeyParameter:
+    Type: String
+    NoEcho: true
+    Description: AuthKey that got from SORACOM User. User type is should be SAM users.
+  AuthKeyIdParameter:
+    Type: String
+    NoEcho: true
+    Description: AuthKeyId that got from SORACOM User. User type is should be SAM users.
+  MaxRemainingParameter:
+    Type: Number
+    MinValue: 1
+    MaxValue: 100
+
+
